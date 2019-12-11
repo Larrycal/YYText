@@ -97,6 +97,11 @@ CGSize YYDeviceScreenSize();
 #endif
 
 
+/// iPhoneX 系列
+#ifndef kiPhoneXSeries
+#define kiPhoneXSeries (kScreenHeight >= 812)
+#endif
+
 
 
 

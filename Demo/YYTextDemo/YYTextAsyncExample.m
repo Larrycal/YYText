@@ -44,9 +44,18 @@
     _yyLabel.size = _uiLabel.size;
     _yyLabel.displaysAsynchronously = YES; /// enable async display
     _yyLabel.hidden = YES;
+    _yyLabel.translatesAutoresizingMaskIntoConstraints = NO;
     
     [self.contentView addSubview:_uiLabel];
     [self.contentView addSubview:_yyLabel];
+    
+    [[_yyLabel.leftAnchor constraintEqualToAnchor:self.contentView.leftAnchor] setActive:YES];
+    
+    [[_yyLabel.rightAnchor constraintEqualToAnchor:self.contentView.rightAnchor] setActive:YES];
+    
+    [[_yyLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor] setActive:YES];
+    
+    [[_yyLabel.topAnchor constraintEqualToAnchor:self.contentView.topAnchor] setActive:YES];
     return self;
 }
 
@@ -81,6 +90,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.tableView = [UITableView new];
+    if (@available(iOS 11.0, *)) {
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    } else {
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
     self.tableView.frame = self.view.bounds;
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -126,14 +140,19 @@
         toolbar = [UIToolbar new];
     }
     toolbar.size = CGSizeMake(kScreenWidth, 40);
-    toolbar.top = kiOS7Later ? 64 : 0;
+    toolbar.top = (kiOS7Later ? 64 : 0) + (kiPhoneXSeries ? 24 : 0);
     [self.view addSubview:toolbar];
     
     
     YYFPSLabel *fps = [YYFPSLabel new];
     fps.centerY = toolbar.height / 2;
     fps.left = 5;
-    [toolbar addSubview:fps];
+    if ([toolbar isKindOfClass:[UIVisualEffectView class]]) {
+        UIVisualEffectView* effectView = (UIVisualEffectView *)toolbar;
+        [effectView.contentView addSubview:fps];
+    } else {
+        [toolbar addSubview:fps];
+    }
     
     UILabel *label = [UILabel new];
     label.backgroundColor = [UIColor clearColor];
@@ -142,7 +161,12 @@
     [label sizeToFit];
     label.centerY = toolbar.height / 2;
     label.left = fps.right + 10;
-    [toolbar addSubview:label];
+    if ([toolbar isKindOfClass:[UIVisualEffectView class]]) {
+        UIVisualEffectView* effectView = (UIVisualEffectView *)toolbar;
+        [effectView.contentView addSubview:label];
+    } else {
+        [toolbar addSubview:label];
+    }
     
     UISwitch *switcher = [UISwitch new];
     [switcher sizeToFit];
@@ -155,7 +179,12 @@
         if (!self) return;
         [self setAsync:switcher.isOn];
     }];
-    [toolbar addSubview:switcher];
+    if ([toolbar isKindOfClass:[UIVisualEffectView class]]) {
+        UIVisualEffectView* effectView = (UIVisualEffectView *)toolbar;
+        [effectView.contentView addSubview:switcher];
+    } else {
+        [toolbar addSubview:switcher];
+    }
 }
 
 - (void)setAsync:(BOOL)async {
@@ -178,7 +207,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return kCellHeight;
+    return UITableViewAutomaticDimension;
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath {

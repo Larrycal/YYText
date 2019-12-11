@@ -222,6 +222,7 @@
     
     
     YYLabel *label = [YYLabel new];
+    label.origin = CGPointMake(0, 100);
     label.attributedText = text;
     label.width = self.view.width;
     label.height = self.view.height - (kiOS7Later ? 64 : 44);

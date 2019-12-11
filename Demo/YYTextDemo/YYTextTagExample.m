@@ -19,6 +19,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.automaticallyAdjustsScrollViewInsets = NO;
     self.view.backgroundColor = [UIColor whiteColor];
     if ([self respondsToSelector:@selector(setAutomaticallyAdjustsScrollViewInsets:)]) {
         self.automaticallyAdjustsScrollViewInsets = NO;
@@ -76,6 +77,7 @@
     [text appendAttributedString:text]; // repeat for test
     
     YYTextView *textView = [YYTextView new];
+    textView.origin = CGPointMake(0, 100);
     textView.attributedText = text;
     textView.size = self.view.size;
     textView.textContainerInset = UIEdgeInsetsMake(10 + 64, 10, 10, 10);

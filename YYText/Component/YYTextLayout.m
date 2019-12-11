@@ -724,7 +724,24 @@ dispatch_semaphore_signal(_lock);
                     type = kCTLineTruncationMiddle;
                 }
                 NSMutableAttributedString *lastLineText = [text attributedSubstringFromRange:lastLine.range].mutableCopy;
-                [lastLineText appendAttributedString:truncationToken];
+                // fix LineBreakMode is Head or middle:https://github.com/ibireme/YYText/issues/907
+                if (type == kCTLineTruncationStart) {
+                    NSMutableAttributedString *newLastLineText = [text attributedSubstringFromRange:(NSRange){text.length-lastLine.range.length, lastLine.range.length}].mutableCopy;
+                    [newLastLineText replaceCharactersInRange:NSMakeRange(0, 1) withAttributedString:truncationToken];
+                    lastLineText = newLastLineText;
+                }
+                else if (type == kCTLineTruncationMiddle) {
+                    NSUInteger lastLineTextCount = lastLine.range.length;
+                    NSUInteger lastLineTextMiddleIndex = lastLineTextCount/2;
+                    NSMutableAttributedString *mutableTruncationToken = truncationToken.mutableCopy;
+                    NSAttributedString *newLastLineEndText = [text attributedSubstringFromRange:(NSRange){text.length-lastLineTextMiddleIndex, lastLineTextMiddleIndex}];
+                    [mutableTruncationToken appendAttributedString:newLastLineEndText];
+                    [lastLineText replaceCharactersInRange:NSMakeRange(lastLineTextCount-mutableTruncationToken.length, mutableTruncationToken.length)
+                                      withAttributedString:mutableTruncationToken];
+                }
+                else {
+                    [lastLineText appendAttributedString:truncationToken];
+                }
                 CTLineRef ctLastLineExtend = CTLineCreateWithAttributedString((CFAttributedStringRef)lastLineText);
                 if (ctLastLineExtend) {
                     CGFloat truncatedWidth = lastLine.width;
